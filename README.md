@@ -47,6 +47,9 @@ As of 3/6/2018, DDS has confirmed that support for IE is limited to IE 11 and Ed
 
 ## Development
 
+### Setting Up Your Environment
+For now, this lives [here](https://docs.google.com/document/d/148RzqgaQbhOxXd4z_xuj5Jz8JNETThrn7RVFmMqXFvk/edit), but should likely be transfered to this README wholecloth at some point.
+
 ### Git
 
 Use your work email when making commits to our repositories. The simplest path to correctness is setting global config:
