@@ -2,7 +2,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-//this is taken from https://designsystem.digital.gov/components/alerts/
+/** An Alert component that produces  https://designsystem.digital.gov/components/alerts/
+ */
 const Alert = props => (
   <div className={`usa-alert usa-alert-${props.type}`}>
     <div className="usa-alert-body">
@@ -13,8 +14,11 @@ const Alert = props => (
 );
 
 Alert.propTypes = {
+  /** the heading of the Alert */
   heading: PropTypes.string.isRequired,
+  /** the type of the Alert */
+  type: PropTypes.oneOf(['error', 'warning', 'info', 'success']).isRequired,
+  /** the content of the Alert */
   children: PropTypes.node.isRequired,
-  type: PropTypes.oneOf(['error', 'warning', 'info', 'success']),
 };
 export default Alert;
