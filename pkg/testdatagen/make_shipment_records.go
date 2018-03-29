@@ -15,9 +15,16 @@ func MakeShipment(db *pop.Connection, requestedPickup time.Time,
 	tdl models.TrafficDistributionList) (models.Shipment, error) {
 
 	market := "dHHG"
+
+	move, err := MakeMove(db)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	shipment := models.Shipment{
 		TrafficDistributionListID: tdl.ID,
 		PickupDate:                pickup,
+		MoveID:                    move.ID,
 		RequestedPickupDate:       requestedPickup,
 		DeliveryDate:              delivery,
 		BookDate:                  DateInsidePerformancePeriod,
@@ -25,7 +32,7 @@ func MakeShipment(db *pop.Connection, requestedPickup time.Time,
 		Market:                    &market,
 	}
 
-	_, err := db.ValidateAndSave(&shipment)
+	_, err = db.ValidateAndSave(&shipment)
 	if err != nil {
 		log.Panic(err)
 	}

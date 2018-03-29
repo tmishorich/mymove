@@ -1,0 +1,10 @@
+drop_column("moves", "origin_address_id")
+drop_column("moves", "delivery_address_id")
+drop_column("moves", "delivery_address_known")
+
+drop_column("shipments", "use_destination_storage")
+drop_column("shipments", "secondary_pickup_address_id")
+drop_column("shipments", "secondary_delivery_address_id")
+
+drop_foreign_key("shipments", "shipments_moves_id_fk", {})
+drop_column("shipments", "move_id")

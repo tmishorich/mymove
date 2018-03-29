@@ -19,8 +19,9 @@ func MakeMove(db *pop.Connection) (models.Move, error) {
 	}
 	var selectedType = internalmessages.SelectedMoveTypeCOMBO
 	move = models.Move{
-		UserID:           user.ID,
-		SelectedMoveType: &selectedType,
+		UserID:               user.ID,
+		SelectedMoveType:     &selectedType,
+		DeliveryAddressKnown: false,
 	}
 
 	verrs, err := db.ValidateAndSave(&move)

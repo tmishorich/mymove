@@ -17,16 +17,23 @@ import (
 // DeliveryDate: when the shipment is to be delivered
 // BookDate: when the shipment was most recently offered to a TSP
 type Shipment struct {
-	ID                        uuid.UUID `json:"id" db:"id"`
-	CreatedAt                 time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt                 time.Time `json:"updated_at" db:"updated_at"`
-	PickupDate                time.Time `json:"pickup_date" db:"pickup_date"`
-	RequestedPickupDate       time.Time `json:"requested_pickup_date" db:"requested_pickup_date"`
-	DeliveryDate              time.Time `json:"delivery_date" db:"delivery_date"`
-	BookDate                  time.Time `json:"book_date" db:"book_date"`
-	TrafficDistributionListID uuid.UUID `json:"traffic_distribution_list_id" db:"traffic_distribution_list_id"`
-	SourceGBLOC               string    `json:"source_gbloc" db:"source_gbloc"`
-	Market                    *string   `json:"market" db:"market"`
+	ID                         uuid.UUID  `json:"id" db:"id"`
+	CreatedAt                  time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt                  time.Time  `json:"updated_at" db:"updated_at"`
+	Move                       Move       `belongs_to:"move"`
+	MoveID                     uuid.UUID  `json:"move_id" db:"move_id"`
+	SecondaryPickupAddressID   *uuid.UUID `json:"secondary_pickup_address_id" db:"secondary_pickup_address_id"`
+	SecondaryPickupAddress     *Address   `belongs_to:"address"`
+	SecondaryDeliveryAddressID *uuid.UUID `json:"secondary_delivery_address_id" db:"secondary_delivery_address_id"`
+	SecondaryDeliveryAddress   *Address   `belongs_to:"address"`
+	UseDestinationStorage      bool       `json:"use_destination_storage" db:"use_destination_storage"`
+	PickupDate                 time.Time  `json:"pickup_date" db:"pickup_date"`
+	RequestedPickupDate        time.Time  `json:"requested_pickup_date" db:"requested_pickup_date"`
+	DeliveryDate               time.Time  `json:"delivery_date" db:"delivery_date"`
+	BookDate                   time.Time  `json:"book_date" db:"book_date"`
+	TrafficDistributionListID  uuid.UUID  `json:"traffic_distribution_list_id" db:"traffic_distribution_list_id"`
+	SourceGBLOC                string     `json:"source_gbloc" db:"source_gbloc"`
+	Market                     *string    `json:"market" db:"market"`
 }
 
 // ShipmentWithOffer represents a single offered shipment within a Service Member's move.

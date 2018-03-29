@@ -16,11 +16,17 @@ import (
 
 // Move is an object representing a move
 type Move struct {
-	ID               uuid.UUID                          `json:"id" db:"id"`
-	CreatedAt        time.Time                          `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time                          `json:"updated_at" db:"updated_at"`
-	UserID           uuid.UUID                          `json:"user_id" db:"user_id"`
-	SelectedMoveType *internalmessages.SelectedMoveType `json:"selected_move_type" db:"selected_move_type"`
+	ID                   uuid.UUID                          `json:"id" db:"id"`
+	CreatedAt            time.Time                          `json:"created_at" db:"created_at"`
+	UpdatedAt            time.Time                          `json:"updated_at" db:"updated_at"`
+	UserID               uuid.UUID                          `json:"user_id" db:"user_id"`
+	User                 User                               `belongs_to:"user"`
+	SelectedMoveType     *internalmessages.SelectedMoveType `json:"selected_move_type" db:"selected_move_type"`
+	OriginAddressID      *uuid.UUID                         `json:"origin_address_id" db:"origin_address_id"`
+	OriginAddress        *Address                           `belongs_to:"address"`
+	DeliveryAddressID    *uuid.UUID                         `json:"delivery_address_id" db:"delivery_address_id"`
+	DeliveryAddress      *Address                           `belongs_to:"address"`
+	DeliveryAddressKnown bool                               `json:"delivery_address_known" db:"delivery_address_known"`
 }
 
 // String is not required by pop and may be deleted

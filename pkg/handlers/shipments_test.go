@@ -1,12 +1,21 @@
 package handlers
 
 import (
+	"github.com/gobuffalo/uuid"
+
 	shipmentop "github.com/transcom/mymove/pkg/gen/internalapi/internaloperations/shipments"
+	internalmessages "github.com/transcom/mymove/pkg/gen/internalmessages"
 	"github.com/transcom/mymove/pkg/models"
 )
 
 func (suite *HandlerSuite) TestIndexShipmentsHandler() {
 	t := suite.T()
+
+	user := models.User{
+		LoginGovUUID:  uuid.Must(uuid.NewV4()),
+		LoginGovEmail: "email@example.com",
+	}
+	suite.mustSave(&user)
 
 	tsp := models.TransportationServiceProvider{
 		StandardCarrierAlphaCode: "scac",
@@ -21,15 +30,24 @@ func (suite *HandlerSuite) TestIndexShipmentsHandler() {
 	}
 	suite.mustSave(&tdl)
 
+	selectedType := internalmessages.SelectedMoveTypeHHG
+	move := models.Move{
+		UserID:           user.ID,
+		SelectedMoveType: &selectedType,
+	}
+	suite.mustSave(&move)
+
 	avs := models.Shipment{
 		TrafficDistributionListID: tdl.ID,
 		SourceGBLOC:               "AGFM",
+		MoveID:                    move.ID,
 	}
 	suite.mustSave(&avs)
 
 	aws := models.Shipment{
 		TrafficDistributionListID: tdl.ID,
 		SourceGBLOC:               "AGFM",
+		MoveID:                    move.ID,
 	}
 	suite.mustSave(&aws)
 

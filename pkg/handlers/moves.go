@@ -35,8 +35,14 @@ func (h CreateMoveHandler) Handle(params moveop.CreateMoveParams) middleware.Res
 
 	// Create a new move for an authenticated user
 	newMove := models.Move{
-		UserID:           user.ID,
-		SelectedMoveType: params.CreateMovePayload.SelectedMoveType,
+		UserID:                   user.ID,
+		DeliveryAddress:          params.CreateMovePayload.DeliveryAddress,
+		DeliveryAddressKnown:     params.CreateMovePayload.DeliveryAddressKnown,
+		PickupAddress:            params.CreateMovePayload.PickupAddress,
+		SecondaryDeliveryAddress: params.CreateMovePayload.SecondaryDeliveryAddress,
+		SecondaryPickupAddress:   params.CreateMovePayload.SecondaryPickupAddress,
+		UseDestinationStorage:    params.CreateMovePayload.UseDestinationStorage,
+		SelectedMoveType:         params.CreateMovePayload.SelectedMoveType,
 	}
 	if verrs, err := h.db.ValidateAndCreate(&newMove); verrs.HasAny() || err != nil {
 		if verrs.HasAny() {
