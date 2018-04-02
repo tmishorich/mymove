@@ -1,6 +1,7 @@
 package recordlocator
 
 import (
+	"crypto/md5"
 	"math/rand"
 	"strings"
 )
@@ -14,40 +15,26 @@ import (
 // this leaves 32 possible characters, with 5 non-check digits,
 // so there are 32 ^ 5 == 33,500,000 valid Record Locators using this scheme.
 
-// Our checksum scheme is simple. Given a record locator with six digits d1, d2, d3...
-// The checksum is valid if and only if:
-//        d1 * 11 + d2 * 9 + d3 * 7 + d4 * 5 + d5 * 3 + d6 % 32 == 0
-
-// It is important that the coefficients in this equation are all relatively prime to 32.
-// I picked ascending prime numbers (leaving out 2) for simplicity.
+// Our checksum scheme is simple. We take an md5 of the first 5 digits, this returns
+// an array of bytes, we take the first byte mod 32 and that's the check digit.
 
 // DANGER WILL ROBINSON
 // If any of these constants are changed, all extant record locators will become invalid!
 const locatorCharacterSet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 const finalLocatorLength = 6
 
-var relativelyPrimeCoefficients = [...]int{11, 9, 7, 5, 3, 1}
-
 // end DANGER
 
-// checksumForString returns the checksum for this string. It returns the checksum so far,
-// so it is safe to use this on both 5 and 6 character strings.
-// It expects the strings to only contain valid characters, though.
-func checksumForString(locator string) int {
-	checksum := 0
-	for i := 0; i < len(locator); i++ {
-		digit := string(locator[i])
-		intValue := strings.Index(locatorCharacterSet, digit)
-		checksum += intValue * relativelyPrimeCoefficients[i]
-	}
-	return checksum % len(locatorCharacterSet)
+func checksumForPrefix(locator string) string {
+	checksum := md5.Sum([]byte(locator))
+	characterIndex := checksum[0] % 32 // it's a 16 byte number, we just mod the first byte
+	checkDigit := string(locatorCharacterSet[characterIndex])
+	return checkDigit
 }
 
 // addCheckDigit adds a check digit to the five digit prefix
 func addCheckDigit(prefix string) string {
-	incompleteChecksum := checksumForString(prefix)
-	inverse := len(locatorCharacterSet) - ((incompleteChecksum) % len(locatorCharacterSet))
-	checkDigit := string(locatorCharacterSet[inverse])
+	checkDigit := checksumForPrefix(prefix)
 
 	return prefix + checkDigit
 }
@@ -80,6 +67,9 @@ func CheckRecordLocator(locator string) bool {
 		}
 	}
 
-	checksum := checksumForString(strings.ToUpper(normalizedLocator))
-	return checksum == 0
+	prefix := string(normalizedLocator[0 : finalLocatorLength-1])
+	checkDigit := string(normalizedLocator[finalLocatorLength-1])
+
+	checksum := checksumForPrefix(prefix)
+	return checksum == checkDigit
 }
