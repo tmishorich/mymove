@@ -375,7 +375,6 @@ func (suite *HandlerSuite) TestShowMoveHandler() {
 }
 
 func (suite *HandlerSuite) TestShowMoveWrongUser() {
-	t := suite.T()
 
 	// Given: A move with a not-logged-in user and a separate logged-in user
 	notLoggedInUser := models.User{
@@ -412,8 +411,5 @@ func (suite *HandlerSuite) TestShowMoveWrongUser() {
 	showHandler := ShowMoveHandler(NewHandlerContext(suite.db, suite.logger))
 	showResponse := showHandler.Handle(showMoveParams)
 
-	_, ok := showResponse.(*moveop.ShowMoveForbidden)
-	if !ok {
-		t.Fatalf("Request failed: %#v", showResponse)
-	}
+	suite.checkResponseForbidden(showResponse)
 }

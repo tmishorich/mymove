@@ -3,11 +3,13 @@ package handlers
 import (
 	"log"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path"
 	"testing"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gobuffalo/pop"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
@@ -27,11 +29,42 @@ func (suite *HandlerSuite) SetupTest() {
 func (suite *HandlerSuite) mustSave(model interface{}) {
 	verrs, err := suite.db.ValidateAndSave(model)
 	if err != nil {
-		log.Panic(err)
+		suite.T().Fatalf("Errors encountered saving %v: %v", model, err)
 	}
-	if verrs.Count() > 0 {
-		suite.T().Fatalf("errors encountered saving %v: %v", model, verrs)
+	if verrs.HasAny() {
+		suite.T().Fatalf("Validation errors encountered saving %v: %v", model, verrs)
 	}
+}
+
+func (suite *HandlerSuite) checkErrorResponse(resp middleware.Responder, code int, name string) {
+	errResponse, ok := resp.(*ErrResponse)
+	if !ok || errResponse.code != code {
+		suite.T().Fatalf("Expected %s Response: %v", name, resp)
+	}
+}
+
+func (suite *HandlerSuite) checkResponseBadRequest(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusBadRequest, "BadRequest")
+}
+
+func (suite *HandlerSuite) checkResponseUnauthorized(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusUnauthorized, "Unauthorized")
+}
+
+func (suite *HandlerSuite) checkResponseForbidden(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusForbidden, "Forbidden")
+}
+
+func (suite *HandlerSuite) checkResponseNotFound(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusNotFound, "NotFound")
+}
+
+func (suite *HandlerSuite) checkResponseInternalServerError(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusInternalServerError, "InternalServerError")
+}
+
+func (suite *HandlerSuite) checkResponseTeapot(resp middleware.Responder) {
+	suite.checkErrorResponse(resp, http.StatusTeapot, "Teapot")
 }
 
 func (suite *HandlerSuite) fixture(name string) *runtime.File {

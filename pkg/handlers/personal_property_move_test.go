@@ -50,6 +50,7 @@ func (suite *HandlerSuite) TestCreatePPMHandler() {
 	request := httptest.NewRequest("POST", "/fake/path", nil)
 	ctx := request.Context()
 	ctx = authctx.PopulateAuthContext(ctx, user1.ID, "faketoken")
+	ctx = authctx.PopulateUserModel(ctx, user1)
 	request = request.WithContext(ctx)
 
 	newPPMPayload := internalmessages.CreatePersonallyProcuredMovePayload{WeightEstimate: swag.Int64(12)}
@@ -71,22 +72,19 @@ func (suite *HandlerSuite) TestCreatePPMHandler() {
 
 	// Next try the wrong user
 	ctx = authctx.PopulateAuthContext(ctx, user2.ID, "faketoken")
+	ctx = authctx.PopulateUserModel(ctx, user2)
 	request = request.WithContext(ctx)
 	newPPMParams.HTTPRequest = request
 
 	badUserResponse := handler.Handle(newPPMParams)
 	// assert we got unauthorized
-	notAuthorizedResponse := badUserResponse.(*ppmop.CreatePersonallyProcuredMoveForbidden)
-
-	fmt.Println(notAuthorizedResponse)
+	suite.checkResponseForbidden(badUserResponse)
 
 	// Now try a bad move
 	newPPMParams.MoveID = strfmt.UUID(uuid.Must(uuid.NewV4()).String())
 	badMoveResponse := handler.Handle(newPPMParams)
 	// assert we get the 404
-	notFoundResponse := badMoveResponse.(*ppmop.CreatePersonallyProcuredMoveNotFound)
-
-	fmt.Println(notFoundResponse)
+	suite.checkResponseNotFound(badMoveResponse)
 
 }
 

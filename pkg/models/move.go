@@ -126,6 +126,41 @@ func GetMoveForUser(db *pop.Connection, userID uuid.UUID, id uuid.UUID) (MoveRes
 	return result, err
 }
 
+// FetchMove returns a move only if it is allowed for the given user to access that move.
+func FetchMove(db *pop.Connection, userID uuid.UUID, id uuid.UUID) (Move, error) {
+	var move Move
+	err := db.Find(&move, id)
+	if err != nil {
+		if errors.Cause(err).Error() == RecordNotFoundErrorString {
+			return Move{}, ErrFetchNotFound
+		}
+		// Otherwise, it's an unexpected err so we return that.
+		return Move{}, err
+	}
+	// TODO: Handle case where more than one user is authorized to modify move
+	if move.UserID != userID {
+		return Move{}, ErrFetchForbidden
+	}
+
+	return move, nil
+}
+
+// CreatePPM Creates a PPM model using data from the attached move
+func (m Move) CreatePPM(db *pop.Connection, size *internalmessages.TShirtSize, weightEstimate *int64) (PersonallyProcuredMove, *validate.Errors, error) {
+	newPPM := PersonallyProcuredMove{
+		MoveID:         m.ID,
+		Move:           m,
+		Size:           size,
+		WeightEstimate: weightEstimate,
+	}
+
+	verrs, err := db.ValidateAndCreate(&newPPM)
+	if err != nil || verrs.HasAny() {
+		newPPM = PersonallyProcuredMove{}
+	}
+	return newPPM, verrs, err
+}
+
 // ValidateMoveOwnership validates that a user owns a move that exists
 func ValidateMoveOwnership(db *pop.Connection, userID uuid.UUID, id uuid.UUID) (bool, bool) {
 	exists := false
